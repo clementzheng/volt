@@ -114,7 +114,7 @@
 		box-sizing: border-box;
 	}
 
-	@media screen and (min-width: 800px) {
+	@media (min-width: 800px) {
 		.full {
 			width: 100%;
 			padding: 5em 1em 2em 1em;
@@ -300,6 +300,29 @@
 			updateRange();
 		}
 		if (isMouseDown && mx < w && mx >= (posActive.left-posRange.left)  && my > hRange/2 && my < hRange) {
+			var ratioMax = 1-mx/w;
+			var valMax = (res*ratioMax)/(1-ratioMax);
+			$('input[name=min_resistance]').val(Math.floor(valMax));
+			updateRange();
+		}
+	});
+
+	$(document).on('click touch', function(e) {
+		var posActive = $('.active_range').offset();
+		var posRange = $('.range_div').offset();
+		var wRange = $('.active_range').width();
+		var hRange = $('.active_range').height();
+		var res = +$('input[name=divider]').val();
+		var w = $('.range_div').width();
+		var mx = e.pageX - posRange.left;
+		var my = e.pageY - posRange.top;
+		if (mx < (wRange+posActive.left-posRange.left) && mx >= 0 && my > 0 && my < hRange/2) {
+			var ratioMin = 1-mx/w;
+			var valMin = (res*ratioMin)/(1-ratioMin);
+			$('input[name=max_resistance]').val(Math.floor(valMin));
+			updateRange();
+		}
+		if (mx < w && mx >= (posActive.left-posRange.left)  && my > hRange/2 && my < hRange) {
 			var ratioMax = 1-mx/w;
 			var valMax = (res*ratioMax)/(1-ratioMax);
 			$('input[name=min_resistance]').val(Math.floor(valMax));
