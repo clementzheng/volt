@@ -1,0 +1,337 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Voltage Divider</title>
+	<meta name="description" content="Voltage divider calculator for Arduino's analogRead">
+	<meta name="author" content="Clement Zheng (clementzheng.info)">
+	
+	<!--CSS-->
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:300, 400" rel="stylesheet">
+	
+	<!--SCRIPTS-->
+	<script 
+		src="https://code.jquery.com/jquery-3.2.1.min.js"
+  		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  		crossorigin="anonymous">
+  	</script>
+	
+	
+</head>
+
+<body onload="init()">
+
+	<div class="container flex">
+		<div class="half intro">
+			<h1>Voltage Divider</h1>
+			<p>Find the optimum resistors to use in your Arduino voltage divider circuit. Estimate the minimum and maximum resistance values of your sensor by sliding the range of analogRead values to match your readings. Then, change the divider resistance to find the optimum resistance for your sensor.
+			</p>
+		</div>
+		<div class="half intro">
+			<img src="ohmslaw.svg">
+		</div>
+	</div>
+	
+	<div class="container flex">
+
+		<div class="full">
+			<div class="range_div">
+				<div class="active_range">
+				</div>
+				<div class="tickmarks">
+				</div>
+			</div>
+		</div>
+
+		<div class="half">
+			<div class="min_div">
+				<label for="min_resistance">Minimum resistance</label><br>
+				<input type="number" name="min_resistance" min="0" step="10" value="0">
+			</div><br>
+			<div class="max_div">
+				<label for="max_resistance">Maximum resistance</label><br>
+				<input type="number" name="max_resistance" min="0" step="10" value="10000">
+			</div>
+		</div>
+
+		<div class="half">
+			<div class="divider_div">
+				<label for="divider">Divider resistance</label><br>
+				<input type="number" name="divider" min="0" step="10" value="10000">
+			</div>
+		</div>
+
+	</div>
+
+<body>
+	
+
+</body>
+
+<style>
+
+	html, body {
+		margin: 0;
+		margin-top: 50px;
+		margin-bottom: 100px;
+		padding: 0;
+		font-family: "Roboto Slab", sans-serif;
+		font-size: 16pt;
+		text-size-adjust: 100%;
+		color: #5FA;
+		background: #333;
+	}
+
+	.container {
+		position: relative;
+		float: left;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+	}
+
+	.flex {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.full {
+		width: 100%;
+		padding: 5em 0 2em 0;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+	}
+
+	.half {
+		width: 100%;
+		max-width: 500px;
+		min-width: 300px;
+		padding: 2em 5%;
+		box-sizing: border-box;
+	}
+
+	@media screen and (min-width: 800px) {
+		.full {
+			width: 100%;
+			padding: 5em 1em 2em 1em;
+			box-sizing: border-box;
+			display: flex;
+			justify-content: center;
+		}
+
+		.half {
+			width: 50%;
+			max-width: 500px;
+			min-width: 300px;
+			padding: 2em 5%;
+			box-sizing: border-box;
+		}
+	}
+
+	.half div {
+		width: 100%;
+		text-align: center;
+	}
+
+	.intro {
+		padding: 2em 0;
+	}
+
+	.intro img {
+		width: 100%;
+		margin-top: 5vw;
+	}
+
+	h1 {
+		margin: 0 0 1em 0;
+		line-height: 1.0;
+		font-size: 2.0em;
+	}
+
+	p {
+		font-family: sans-serif;
+		padding-right: 5em;
+		font-size: 0.70em;
+		line-height: 1.7;
+		font-weight: 300;
+		letter-spacing: 0.02em;
+	}
+
+	input[type=number] {
+		color: #5FA;
+		position: relative;
+		float: left;
+		text-align: center;
+		border: none;
+		font-size: 2em;
+		width: 100%;
+		font-family: "Roboto Slab", sans-serif;
+		border-bottom: 3px solid #5FA;
+		background: rgba(255, 255, 255, 0.1);
+		margin: 0 0 1em 0;
+	}
+
+	input:focus {
+		outline: none;
+	}
+
+	label {
+		position: relative;
+		float: left;
+		width: 100%;
+		margin: 0 0 1em 0;
+	}
+
+	.range_div {
+		position: relative;
+		float: left;
+		width: 90%;
+		max-width: 1000px;
+		height: 200px;
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	.active_range {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 50%;
+		height: 100%;
+		background: #5FA;
+	}
+
+	.tickmarks {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	.tickmarks .ticks {
+		position: relative;
+		float: left;
+		height: 50%;
+		box-sizing: border-box;
+		border-left: 1px solid #999;
+		color: #999;
+		font-size: 0.6em;
+		padding-left: 0.3em;
+	}
+
+	.tickmarks .top_line {
+		border-top: 1px dashed #999;
+	}
+
+</style>
+
+<script>
+
+	function init() {
+		generateTickMarks(16);
+		$('input').on('change', function() {
+			updateRange();
+			var min = +$('input[name=min_resistance]').val();
+			var max = +$('input[name=max_resistance]').val();
+			var res = +$('input[name=divider]').val();
+			if (min > max) {
+				$('input[name=min_resistance]').val(max);
+			}
+		})
+		updateRange();
+	}
+
+	function generateTickMarks(n) {
+		var marks = '';
+		var gap = 1024/n;
+		var gapPerc = 100/n;
+		for (var i=0; i<n; i++) {
+			marks = marks + '<div class="ticks"></div>'
+		}
+		for (var i=0; i<n; i++) {
+			marks = marks + '<div class="ticks top_line">'+gap*i+'</div>'
+		}
+		$('.tickmarks').html(marks);
+		$('.tickmarks .ticks').css({
+			'width':gapPerc+'%'
+		});
+	}
+
+	function updateRange() {
+		var min = +$('input[name=min_resistance]').val();
+		var max = +$('input[name=max_resistance]').val();
+		var res = +$('input[name=divider]').val();
+
+		var rMin = (1-max/(max+res))*100;
+		var rMax = (1-min/(min+res))*100;
+		var w = rMax-rMin;
+		$('.active_range').css({
+			'width' : w+'%',
+			'left' : rMin+'%'
+		});
+	}
+
+	var isMouseDown = false
+	$(document).on('mousedown', function() {
+		isMouseDown = true;
+	});
+	$(document).on('mouseup', function() {
+		isMouseDown = false;
+	});
+
+	$(document).on('mousemove', function(e) {
+		var posActive = $('.active_range').offset();
+		var posRange = $('.range_div').offset();
+		var wRange = $('.active_range').width();
+		var hRange = $('.active_range').height();
+		var res = +$('input[name=divider]').val();
+		var w = $('.range_div').width();
+		var mx = e.pageX - posRange.left;
+		var my = e.pageY - posRange.top;
+		if (isMouseDown && mx < (wRange+posActive.left-posRange.left) && mx >= 0 && my > 0 && my < hRange/2) {
+			var ratioMin = 1-mx/w;
+			var valMin = (res*ratioMin)/(1-ratioMin);
+			$('input[name=max_resistance]').val(Math.floor(valMin));
+			updateRange();
+		}
+		if (isMouseDown && mx < w && mx >= (posActive.left-posRange.left)  && my > hRange/2 && my < hRange) {
+			var ratioMax = 1-mx/w;
+			var valMax = (res*ratioMax)/(1-ratioMax);
+			$('input[name=min_resistance]').val(Math.floor(valMax));
+			updateRange();
+		}
+	});
+
+</script>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
