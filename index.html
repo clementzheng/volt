@@ -62,6 +62,9 @@
 				<label for="divider">Divider resistance</label><br>
 				<input type="number" name="divider" min="0" step="10" value="10000">
 			</div>
+			<div id="maximize" onclick="maximize()">
+				Maximize Range
+			</div>
 		</div>
 
 	</div>
@@ -230,6 +233,26 @@
 		border-top: 1px dashed #999;
 	}
 
+	#maximize {
+		width: 100%;
+		background: #5FA;
+		position: relative;
+		float: left;
+		color: #333;
+		padding: 1em 0;
+		border-radius: 5px;
+		cursor: pointer;
+		opacity: 0.75;
+	}
+
+	#maximize:hover {
+		opacity: 1.0;
+	}
+
+	#maximize:active {
+		background: white;
+	}
+
 </style>
 
 <script>
@@ -331,6 +354,29 @@
 			updateRange();
 		}
 	});
+
+	function maximize() {
+		if (+$('input[name=min_resistance]').val() == 0) {
+			$('#maximize').html('value cannot be 0');
+			setTimeout(function() {
+				$('#maximize').html('Maximize Range');
+			}, 1500);
+		} else {
+			var maxRes = 0;
+			var maxRange = 0;
+			var min = +$('input[name=min_resistance]').val();
+			var max = +$('input[name=max_resistance]').val();
+			for (var i=min; i<=max; i=i+1) {
+				var rMin = 1-max/(max+i);
+				var rMax = 1-min/(min+i);
+				var w = rMax-rMin;
+				maxRes = w > maxRange ? i : maxRes;
+				maxRange = w > maxRange ? w : maxRange;
+			}
+			$('input[name=divider]').val(maxRes);
+			updateRange();
+		}
+	}
 
 </script>
 
