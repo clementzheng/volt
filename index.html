@@ -7,6 +7,7 @@
 	<title>Voltage Divider</title>
 	<meta name="description" content="Voltage divider calculator for Arduino's analogRead">
 	<meta name="author" content="Clement Zheng (clementzheng.info)">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
 	<!--CSS-->
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:300, 400" rel="stylesheet">
@@ -114,7 +115,10 @@
 		box-sizing: border-box;
 	}
 
-	@media (min-width: 800px) {
+	@media only screen 
+	and (min-width: 800px) 
+	and (-webkit-min-device-pixel-ratio: 1) {
+
 		.full {
 			width: 100%;
 			padding: 5em 1em 2em 1em;
