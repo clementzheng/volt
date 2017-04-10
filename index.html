@@ -101,7 +101,7 @@
 
 	.full {
 		width: 100%;
-		padding: 5em 0 2em 0;
+		padding: 5em 5% 2em 5%;
 		box-sizing: border-box;
 		display: flex;
 		justify-content: center;
@@ -237,7 +237,11 @@
 <script>
 
 	function init() {
-		generateTickMarks(16);
+		if ($(document).width() > 800) {
+			generateTickMarks(16);
+		} else {
+			generateTickMarks(8);
+		}
 		$('input').on('change', function() {
 			updateRange();
 			var min = +$('input[name=min_resistance]').val();
