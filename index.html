@@ -29,6 +29,8 @@
 			<h1>Voltage Divider</h1>
 			<p>Find the optimum resistors to use in your Arduino voltage divider circuit. Estimate the minimum and maximum resistance values of your sensor by sliding the range of analogRead values to match your readings. Then, change the divider resistance to find the optimum resistance for your sensor.
 			</p>
+			<p><i>adjust the minimum slider value by clicking on the top half, and maximum slider value by clicking on the bottom half.
+			</i></p>
 		</div>
 		<div class="half intro">
 			<img src="ohmslaw.svg">
@@ -41,25 +43,27 @@
 			<div class="range_div">
 				<div class="active_range">
 				</div>
+				<canvas id="graph">
+				</canvas>
 				<div class="tickmarks">
 				</div>
 			</div>
 		</div>
 
-		<div class="half">
+		<div class="half2">
 			<div class="min_div">
-				<label for="min_resistance">Minimum resistance</label><br>
+				<label for="min_resistance">Minimum resistance (ohm)</label><br>
 				<input type="number" name="min_resistance" min="0" step="10" value="0">
 			</div><br>
 			<div class="max_div">
-				<label for="max_resistance">Maximum resistance</label><br>
+				<label for="max_resistance">Maximum resistance (ohm)</label><br>
 				<input type="number" name="max_resistance" min="0" step="10" value="10000">
 			</div>
 		</div>
 
-		<div class="half">
+		<div class="half2">
 			<div class="divider_div">
-				<label for="divider">Divider resistance</label><br>
+				<label for="divider">Divider resistance (ohm)</label><br>
 				<input type="number" name="divider" min="0" step="10" value="10000">
 			</div>
 			<div id="maximize" onclick="maximize()">
@@ -82,7 +86,7 @@
 		margin-bottom: 100px;
 		padding: 0;
 		font-family: "Roboto Slab", sans-serif;
-		font-size: 16pt;
+		font-size: 15pt;
 		text-size-adjust: 100%;
 		color: #5FA;
 		background: #333;
@@ -116,6 +120,13 @@
 		box-sizing: border-box;
 	}
 
+	.half2 {
+		width: 50%;
+		max-width: 500px;
+		padding: 2em 5%;
+		box-sizing: border-box;
+	}
+
 	@media only screen 
 	and (min-width: 800px) 
 	and (-webkit-min-device-pixel-ratio: 1) {
@@ -146,6 +157,11 @@
 		text-align: center;
 	}
 
+	.half2 div {
+		width: 100%;
+		text-align: center;
+	}
+
 	.intro img {
 		width: 100%;
 		margin-top: 5vw;
@@ -158,12 +174,16 @@
 	}
 
 	p {
-		font-family: sans-serif;
 		padding-right: 5em;
 		font-size: 0.70em;
 		line-height: 1.7;
 		font-weight: 300;
 		letter-spacing: 0.02em;
+		margin-bottom: 2em;
+	}
+
+	p i {
+		font-size: 0.9em;
 	}
 
 	input[type=number] {
@@ -216,6 +236,7 @@
 		width: 100%;
 		height: 100%;
 		pointer-events: none;
+		z-index: 99;
 	}
 
 	.tickmarks .ticks {
@@ -253,11 +274,26 @@
 		background: white;
 	}
 
+	canvas#graph {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 9;
+		pointer-events: none;
+	}
+
 </style>
 
 <script>
 
+	var c, ctx;
+
 	function init() {
+		$('#graph').attr('width', $('.range_div').width()+'px');
+		$('#graph').attr('height', $('.range_div').height()+'px');
+		c = document.getElementById('graph');
+		ctx = c.getContext('2d');
+		ctx.translate(0.5, 0.5);
 		generateTickMarks(16);
 		$('input').on('change', function() {
 			updateRange();
@@ -299,6 +335,27 @@
 			'width' : w+'%',
 			'left' : rMin+'%'
 		});
+
+		var cW = +$('.range_div').width();
+		var cH = +$('.range_div').height();
+		var pStart = Math.floor(rMin/100*cW);
+		var pEnd = Math.floor(rMax/100*cW);
+		ctx.clearRect(-10, -10, cW*2, cH*2);
+		for (var i=pStart; i<=pEnd; i++) {
+			var r = i/cW;
+			var iR = (1-r)/r;
+			var r1 = res*iR;
+			var yPos = cH*(1-(r1-min)/(max-min));
+			if (i==pStart) {
+				ctx.beginPath();
+				ctx.moveTo(i,yPos);
+			} else {
+				ctx.lineTo(i,yPos);
+			}
+		}
+		ctx.lineTo(pStart,cH);
+		ctx.fillStyle = "rgba(255, 255, 255, 0.4";
+		ctx.fill();
 	}
 
 	var isMouseDown = false
@@ -307,6 +364,12 @@
 	});
 	$(document).on('mouseup', function() {
 		isMouseDown = false;
+	});
+
+	$(window).on('resize', function() {
+		$('#graph').attr('width', $('.range_div').width()+'px');
+		$('#graph').attr('height', $('.range_div').height()+'px');
+		updateRange();
 	});
 
 	$(document).on('mousemove', function(e) {
@@ -358,8 +421,10 @@
 	function maximize() {
 		if (+$('input[name=min_resistance]').val() == 0) {
 			$('#maximize').html('value cannot be 0');
+			$('#maximize').css('background', '#F55');
 			setTimeout(function() {
 				$('#maximize').html('Maximize Range');
+				$('#maximize').css('background', '#5FA');
 			}, 1500);
 		} else {
 			var maxRes = 0;
